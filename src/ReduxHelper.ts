@@ -7,75 +7,91 @@ type RecursivePartial<T> = {
             T[P];
 };
 
-export const ReduxHelper = {
-    // keys<T>(data:T):[keyof T]{
-    //     return Object.keys(data)
-    // },
-    generateActions<T>(data:T, store) {
-        const types = Object.keys(data)
-        return  {
-            update<K extends keyof T>(type: K, payload:RecursivePartial<T[K]>){
-                if (!types.includes(type.toString())) {
-                    throw Error ('Type does not exist')
-                    return
-                }
+export class ReduxHelper<StoreState> {
+    private readonly data:StoreState;
+    constructor(data:StoreState) {
+        this.data = data;
+    }
 
-                if (typeof payload !== "object" || payload == null) {
-                    throw Error ('Payload must be an object')
-                    return
-                }
+    private checkInput(type, payload?) {
+        const types = Object.keys(this.data)
+        if (!types.includes(type.toString())) {
+            throw Error ('Type does not exist')
+            return
+        }
+
+        if (typeof payload !== 'undefined') {
+            if (typeof payload !== "object" || payload == null) {
+                throw Error ('Payload must be an object')
+                return
+            }
+        }
+    }
+
+    generateActions(store) {
+        return  {
+            merge: <K extends keyof StoreState>(type: K & string, payload:RecursivePartial<StoreState[K]>) => {
+
+                this.checkInput(type, payload)
 
                 store.dispatch({
-                    type: `${type.toString().toUpperCase()}_UPDATE`,
+                    type: `${type.toString().toUpperCase()}_MERGE`,
                     payload
                 })
             },
+            updateIn: <K extends keyof StoreState,ValueType>(type: K & string,path:(string|number)[],updater:(value:ValueType)=>ValueType, vType?:ValueType) => {
 
-            reset(type) {
+                this.checkInput(type)
+
+                if(typeof path == 'undefined' || !Array.isArray(path)) {
+                    throw Error ('Please provide valid path (array of strings and/or numbers) as a second argument')
+                    return
+                }
+
+                if(typeof updater != 'function') {
+                    throw Error ('Please provide an updater function as a third argument')
+                    return
+                }
+
                 store.dispatch({
-                    type: `${type.toUpperCase()}_UPDATE`
+                    type: `${type.toString().toUpperCase()}_UPDATE_IN`,
+                    payload: {
+                        path,
+                        updater
+                    }
+                })
+
+            },
+            reset: <K extends keyof StoreState>(type: K & string) => {
+
+                this.checkInput(type)
+
+                store.dispatch({
+                    type: `${type.toUpperCase()}_RESET`
                 })
             }
         }
 
-    },
+    }
 
-    createReducers(data) {
+    createReducers() {
         let reducers:any={}
-        for (let key in data){
-            const initialState = Record(data[key])
-            reducers[key] = function (state = new initialState(data[key]), action) {
-                if(action.type==`${key.toUpperCase()}_UPDATE`) {
+        for (let key in this.data){
+            const initialState = Record(this.data[key],key)
+            reducers[key] = (state =  initialState(), action) => {
+                if(action.type==`${key.toUpperCase()}_MERGE`) {
                     return state.mergeDeep(action.payload)
-                } else if(action.type==`${key.toUpperCase()}_RESET`){
-                    return data[key]
+                } else if(action.type==`${key.toUpperCase()}_UPDATE_IN`){
+                    return state.updateIn(action.payload.path, action.payload.updater)
+                } else if(action.type==`${key.toUpperCase()}_RESET`) {
+                    return initialState()
                 }
                 return state
             }
         }
         return reducers
-    },
+    }
 }
-// export const data = {
-//     user: {
-//         name: 'John',
-//         age: 20
-//     },
-//     posts: {
-//         first: {
-//             title: {
-//                 en: 'Title',
-//                 ru: 'Заголовок'
-//             },
-//             text: 'Lorem ipsum'
-//         },
-//         count: 15
-//     }
-// }
-// let actions=ReduxHelper.generateActions(data,{})
-// actions.update("posts", {first: {
-//     title: {
-//         en: 'FASDGDFG'
-//     }
-// }})
+
+export type StoreState = typeof ReduxHelper
 
