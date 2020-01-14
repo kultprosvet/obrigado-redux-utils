@@ -42,6 +42,18 @@ export class ReduxHelper<StoreState> {
                     }
                 })
             },
+            mergeDeep: <T extends StoreState, L extends Path<T, L>>(path: L, payload:PathValue<T, L>) => {
+
+                this.checkInput(path[0], payload)
+
+                store.dispatch({
+                    type: `${path[0].toString().toUpperCase()}_MERGE_DEEP`,
+                    payload: {
+                        path,
+                        payload
+                    }
+                })
+            },
             updateIn: <T extends StoreState, L extends Path<T, L>>(path:L, updater:(value:PathValue<T, L>)=>any) => {
 
                 this.checkInput(path[0])
@@ -83,8 +95,12 @@ export class ReduxHelper<StoreState> {
             const initialState = Record(this.data[key],key)
             reducers[key] = (state =  initialState(), action) => {
                 if(action.type==`${key.toUpperCase()}_MERGE_IN`) {
+                    console.log('type', typeof state)
                     action.payload.path.splice(0,1)
                     return state.mergeIn(action.payload.path, action.payload.payload)
+                } else if(action.type==`${key.toUpperCase()}_MERGE_DEEP`) {
+                    action.payload.path.splice(0, 1)
+                    return state.mergeDeep(action.payload.path, action.payload.payload)
                 } else if(action.type==`${key.toUpperCase()}_UPDATE_IN`){
                     action.payload.path.splice(0,1)
                     return state.updateIn(action.payload.path, action.payload.updater)
@@ -99,4 +115,3 @@ export class ReduxHelper<StoreState> {
 }
 
 export type StoreState = typeof ReduxHelper
-
