@@ -1,11 +1,6 @@
 import {Record} from 'immutable'
+import { PathValue, Path } from "./TSTypes";
 
-type RecursivePartial<T> = {
-    [P in keyof T]?:
-    T[P] extends (infer U)[] ? RecursivePartial<U>[] :
-        T[P] extends object ? RecursivePartial<T[P]> :
-            T[P];
-};
 
 export class ReduxHelper<StoreState> {
     private readonly data:StoreState;
@@ -29,32 +24,40 @@ export class ReduxHelper<StoreState> {
     }
 
     generateActions(store) {
-        return  {
-            merge: <K extends keyof StoreState>(type: K & string, payload:RecursivePartial<StoreState[K]>) => {
 
-                this.checkInput(type, payload)
+        if (typeof store == "undefined") {
+            throw Error ('Store is undefined')
+        }
+
+        return  {
+            mergeIn: <T extends StoreState, L extends Path<T, L>>(path: L, payload:PathValue<T, L>) => {
+
+                this.checkInput(path[0], payload)
 
                 store.dispatch({
-                    type: `${type.toString().toUpperCase()}_MERGE`,
-                    payload
+                    type: `${path[0].toString().toUpperCase()}_MERGE_IN`,
+                    payload: {
+                        path,
+                        payload
+                    }
                 })
             },
-            updateIn: <K extends keyof StoreState,ValueType>(type: K & string,path:(string|number)[],updater:(value:ValueType)=>ValueType, vType?:ValueType) => {
+            updateIn: <T extends StoreState, L extends Path<T, L>>(path:L, updater:(value:PathValue<T, L>)=>any) => {
 
-                this.checkInput(type)
+                this.checkInput(path[0])
 
                 if(typeof path == 'undefined' || !Array.isArray(path)) {
-                    throw Error ('Please provide valid path (array of strings and/or numbers) as a second argument')
+                    throw Error ('Please provide valid path (array of strings and/or numbers) as a first argument')
                     return
                 }
 
                 if(typeof updater != 'function') {
-                    throw Error ('Please provide an updater function as a third argument')
+                    throw Error ('Please provide an updater function as a second argument')
                     return
                 }
 
                 store.dispatch({
-                    type: `${type.toString().toUpperCase()}_UPDATE_IN`,
+                    type: `${path[0].toString().toUpperCase()}_UPDATE_IN`,
                     payload: {
                         path,
                         updater
@@ -62,12 +65,12 @@ export class ReduxHelper<StoreState> {
                 })
 
             },
-            reset: <K extends keyof StoreState>(type: K & string) => {
+            reset: <K extends keyof StoreState>(type: K) => {
 
                 this.checkInput(type)
 
                 store.dispatch({
-                    type: `${type.toUpperCase()}_RESET`
+                    type: `${type.toString().toUpperCase()}_RESET`
                 })
             }
         }
@@ -79,9 +82,11 @@ export class ReduxHelper<StoreState> {
         for (let key in this.data){
             const initialState = Record(this.data[key],key)
             reducers[key] = (state =  initialState(), action) => {
-                if(action.type==`${key.toUpperCase()}_MERGE`) {
-                    return state.mergeDeep(action.payload)
+                if(action.type==`${key.toUpperCase()}_MERGE_IN`) {
+                    action.payload.path.splice(0,1)
+                    return state.mergeIn(action.payload.path, action.payload.payload)
                 } else if(action.type==`${key.toUpperCase()}_UPDATE_IN`){
+                    action.payload.path.splice(0,1)
                     return state.updateIn(action.payload.path, action.payload.updater)
                 } else if(action.type==`${key.toUpperCase()}_RESET`) {
                     return initialState()
