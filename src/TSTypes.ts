@@ -119,3 +119,11 @@ export type PathValue<T, L extends Path<T, L>> = L extends PathArray<T, L>
     : L extends keyof T
         ? T[L]
         : any;
+
+export type RecursivePartial<T> = {
+    [P in keyof T]?:
+    T[P] extends (infer U)[] ? RecursivePartial<U>[] :
+        T[P] extends object ? RecursivePartial<T[P]> :
+            T[P];
+};
+

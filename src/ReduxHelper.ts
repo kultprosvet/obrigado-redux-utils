@@ -1,9 +1,13 @@
-import {Record} from 'immutable'
-import { PathValue, Path } from "./TSTypes";
-
+import { Record } from 'immutable'
+import {PathValue, Path, RecursivePartial} from "./TSTypes";
+//@ts-ignore
+import { persistReducer } from 'redux-persist'
+//@ts-ignore
+import { combineReducers } from 'redux'
+import * as immutableTransform from 'redux-persist-transform-immutable';
 
 export class ReduxHelper<StoreState> {
-    private readonly data:StoreState;
+     readonly data:StoreState;
     constructor(data:StoreState) {
         this.data = data;
     }
@@ -30,7 +34,7 @@ export class ReduxHelper<StoreState> {
         }
 
         return  {
-            mergeIn: <T extends StoreState, L extends Path<T, L>>(path: L, payload:PathValue<T, L>) => {
+            mergeIn: <T extends StoreState, L extends Path<T, L>, U extends RecursivePartial<PathValue<T, L>>>(path: L, payload: U) => {
 
                 this.checkInput(path[0], payload)
 
@@ -42,12 +46,12 @@ export class ReduxHelper<StoreState> {
                     }
                 })
             },
-            mergeDeep: <T extends StoreState, L extends Path<T, L>>(path: L, payload:PathValue<T, L>) => {
+            mergeDeepIn: <T extends StoreState, L extends Path<T, L>, U extends RecursivePartial<PathValue<T, L>>>(path: L, payload: U) => {
 
                 this.checkInput(path[0], payload)
 
                 store.dispatch({
-                    type: `${path[0].toString().toUpperCase()}_MERGE_DEEP`,
+                    type: `${path[0].toString().toUpperCase()}_MERGE_DEEP_IN`,
                     payload: {
                         path,
                         payload
@@ -89,18 +93,17 @@ export class ReduxHelper<StoreState> {
 
     }
 
-    createReducers() {
+    generateReducers() {
         let reducers:any={}
         for (let key in this.data){
-            const initialState = Record(this.data[key],key)
+            const initialState = Record(this.data[key], key)
             reducers[key] = (state =  initialState(), action) => {
                 if(action.type==`${key.toUpperCase()}_MERGE_IN`) {
-                    console.log('type', typeof state)
                     action.payload.path.splice(0,1)
                     return state.mergeIn(action.payload.path, action.payload.payload)
-                } else if(action.type==`${key.toUpperCase()}_MERGE_DEEP`) {
-                    action.payload.path.splice(0, 1)
-                    return state.mergeDeep(action.payload.path, action.payload.payload)
+                } else if(action.type==`${key.toUpperCase()}_MERGE_DEEP_IN`) {
+                    action.payload.path.splice(0,1)
+                    return state.mergeDeepIn(action.payload.path, action.payload.payload)
                 } else if(action.type==`${key.toUpperCase()}_UPDATE_IN`){
                     action.payload.path.splice(0,1)
                     return state.updateIn(action.payload.path, action.payload.updater)
@@ -111,6 +114,33 @@ export class ReduxHelper<StoreState> {
             }
         }
         return reducers
+    }
+    generatePersistsReducers(storageEngine:any, whiteList:string[], customReducers?:object){
+
+        const reducers=this.generateReducers()
+
+        const records = []
+        for (let key in this.data) {
+            //@ts-ignore
+            records.push(Record(this.data[key], key))
+        }
+
+        const persistConfig = {
+            key: 'root',
+            storage: storageEngine,
+            whitelist: whiteList,
+            transforms: [immutableTransform({records: records})]
+        }
+
+        console.log('persistConfig', persistConfig)
+
+        const rootPersistReducer = customReducers
+            ? combineReducers({...reducers, ...customReducers})
+            : combineReducers({...reducers});
+
+        console.log('rootPersistReducer', rootPersistReducer)
+
+        return persistReducer(persistConfig, rootPersistReducer)
     }
 }
 
