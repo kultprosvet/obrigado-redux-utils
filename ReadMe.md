@@ -37,10 +37,10 @@ const data = {
 const rHelper = new ReduxHelper(data)
 const generatedReducers = rHelper.generateReducers()
 
-const rootReducer = combineReducers(
+const rootReducer = combineReducers({
     ...generatedReducers,
     // your other reducers
-)
+})
 
 const store = createStore(rootReducer)
 
