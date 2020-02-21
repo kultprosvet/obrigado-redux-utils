@@ -131,7 +131,7 @@ You can easily create rootSaga and SagaHelper which helps you to run sagas from 
 ```javascript
 import * as module1 from './sagas/module1'
 import * as module2 from './sagas/module2'
-const sagaModules = [module1,module2]
+const sagaModules = {module1,module2}
 ``` 
 2. Call createRootSaga , that's all! 
 ```javascript 
@@ -155,7 +155,7 @@ export const SagaHelper = createSagaHelper(sagaModules, store)
 import {SagaHelper} from './store'
 function Component(){
      useEffect(() => {
-        SagaHelper.run("loadData",{page:1}).then(
+        SagaHelper.run(["module1","loadData"],{page:1}).then(
                 (data)=>console.log(data))
         .catch((e)=>console.warn(e))
         return () => {};

@@ -1,5 +1,6 @@
 import { takeEvery, call } from 'redux-saga/effects'
 import { Action } from 'redux'
+import { Path, PathValue } from './TSTypes'
 
 type SagaAction = {
     type: string
@@ -9,30 +10,40 @@ type SagaAction = {
 }
 function* sagaRunner(saga: (...args: any[]) => any, action: SagaAction) {
     try {
-        const result = yield call(saga, action.payload)
+        const result = yield call(saga, ...action.payload)
         action.resolve(result)
     } catch (e) {
         action.reject(e)
     }
 }
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
-type Keys<T extends Array<any>> = keyof UnionToIntersection<T[number]>
 
-export function createRootSaga(modules: Array<any>) {
+export function createRootSaga(modules: any) {
     return function*(action: Action) {
-        for (const module of modules) {
-            for (const saga in module) {
+        for (const m in modules) {
+            for (const saga in modules[m]) {
+                const module = modules[m]
                 // @ts-ignore
-                yield takeEvery(`RUN_${saga.toUpperCase()}`, sagaRunner.bind({}, module[saga]))
+                yield takeEvery(`RUN_${m.toUpperCase()}_${saga.toUpperCase()}`, sagaRunner.bind({}, module[saga]))
             }
         }
     }
 }
-export function createSagaHelper<T extends any[]>(modules: T, store: any) {
+type FunctionWrapper<F> = F extends (...args: any) => any ? F : (a: any) => void
+export function createSagaHelper<SagaModules>(modules: SagaModules, store: any) {
     return {
-        run: (sagaName: Keys<T>, payload: any = {}): Promise<any> => {
+        run: <T extends SagaModules, L extends Path<T, L>, U extends Parameters<FunctionWrapper<PathValue<T, L>>>>(
+            path: L,
+            ...payload: U
+        ): Promise<any> => {
             return new Promise((resolve, reject) => {
-                const sagaAction = { type: 'RUN_' + (sagaName as string).toUpperCase(), resolve, reject, payload }
+                // @ts-ignore
+                const sagaAction = {
+                    // @ts-ignore
+                    type: `RUN_${path[0].toUpperCase()}_${path[1].toUpperCase()}`,
+                    resolve,
+                    reject,
+                    payload,
+                }
                 // @ts-ignore
                 store.dispatch(sagaAction)
             })
