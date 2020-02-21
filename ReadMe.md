@@ -124,3 +124,49 @@ Type is a string that specifies what part of the store you want to reset.
 ```javascript
 actions.reset('user') // will reset user to initial state
 ``` 
+#Sagas
+You can easily create rootSaga and SagaHelper which helps you to run sagas from modules.
+## Root saga
+1. Import all modules with sagas into array:
+```javascript
+import * as module1 from './sagas/module1'
+import * as module2 from './sagas/module2'
+const sagaModules = [module1,module2]
+``` 
+2. Call createRootSaga , that's all! 
+```javascript 
+import { createRootSaga} from 'obrigado-redux-utils'
+...
+sagaMiddleware.run(createRootSaga(sagaModules))
+```
+createRootSaga generates action handler for each saga in format \[RUN_sagaName in upperCase\]
+### Saga helper
+SagaHelper is created in way similar to creating rootSaga
+```javascript  
+import { createSagaHelper} from 'obrigado-redux-utils'
+...
+export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMiddleware)))
+//@ts-ignore current version of redux-saga has wrong type mapping and reuires 2 args
+sagaMiddleware.run(createRootSaga(sagaModules))
+export const SagaHelper = createSagaHelper(sagaModules, store)
+```
+### Calling sagas
+```javascript  
+import {SagaHelper} from './store'
+function Component(){
+     useEffect(() => {
+        SagaHelper.run("loadData",{page:1}).then(
+                (data)=>console.log(data))
+        .catch((e)=>console.warn(e))
+        return () => {};
+      });
+}
+```
+Saga for handling such call can look like this:
+```javascript   
+export function* loadData(params:{page:number}){
+    let res= yield appCall(params.page)
+    if (!res) throw new Error("Empty result")
+    return result;
+} 
+```
