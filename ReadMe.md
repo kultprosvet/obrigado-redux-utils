@@ -167,6 +167,6 @@ Saga for handling such call can look like this:
 export function* loadData(params:{page:number}){
     let res= yield appCall(params.page)
     if (!res) throw new Error("Empty result")
-    return result;
+    return res;
 } 
 ```
