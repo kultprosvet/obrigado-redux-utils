@@ -46,6 +46,18 @@ export class ReduxHelper<StoreState> {
                     }
                 })
             },
+            mergeInAction: <T extends StoreState, L extends Path<T, L>, U extends RecursivePartial<PathValue<T, L>>>(path: L, payload: U) => {
+
+                this.checkInput(path[0], payload)
+
+                return {
+                    type: `${path[0].toString().toUpperCase()}_MERGE_IN`,
+                    payload: {
+                        path,
+                        payload
+                    }
+                }
+            },
             mergeDeepIn: <T extends StoreState, L extends Path<T, L>, U extends RecursivePartial<PathValue<T, L>>>(path: L, payload: U) => {
 
                 this.checkInput(path[0], payload)
@@ -57,6 +69,18 @@ export class ReduxHelper<StoreState> {
                         payload
                     }
                 })
+            },
+            mergeDeepInAction: <T extends StoreState, L extends Path<T, L>, U extends RecursivePartial<PathValue<T, L>>>(path: L, payload: U) => {
+
+                this.checkInput(path[0], payload)
+
+                return {
+                    type: `${path[0].toString().toUpperCase()}_MERGE_DEEP_IN`,
+                    payload: {
+                        path,
+                        payload
+                    }
+                }
             },
             updateIn: <T extends StoreState, L extends Path<T, L>>(path:L, updater:(value:PathValue<T, L>)=>any) => {
 
@@ -81,6 +105,29 @@ export class ReduxHelper<StoreState> {
                 })
 
             },
+            updateInAction: <T extends StoreState, L extends Path<T, L>>(path:L, updater:(value:PathValue<T, L>)=>any) => {
+
+                this.checkInput(path[0])
+
+                if(typeof path == 'undefined' || !Array.isArray(path)) {
+                    throw Error ('Please provide valid path (array of strings and/or numbers) as a first argument')
+                    return
+                }
+
+                if(typeof updater != 'function') {
+                    throw Error ('Please provide an updater function as a second argument')
+                    return
+                }
+
+                return {
+                    type: `${path[0].toString().toUpperCase()}_UPDATE_IN`,
+                    payload: {
+                        path,
+                        updater
+                    }
+                }
+
+            },
             reset: <K extends keyof StoreState>(type: K) => {
 
                 this.checkInput(type)
@@ -88,6 +135,14 @@ export class ReduxHelper<StoreState> {
                 store.dispatch({
                     type: `${type.toString().toUpperCase()}_RESET`
                 })
+            },
+            resetAction: <K extends keyof StoreState>(type: K) => {
+
+                this.checkInput(type)
+
+                return {
+                    type: `${type.toString().toUpperCase()}_RESET`
+                }
             }
         }
 
