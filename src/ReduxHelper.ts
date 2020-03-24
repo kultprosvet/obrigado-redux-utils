@@ -111,12 +111,10 @@ export class ReduxHelper<StoreState> {
 
                 if(typeof path == 'undefined' || !Array.isArray(path)) {
                     throw Error ('Please provide valid path (array of strings and/or numbers) as a first argument')
-                    return
                 }
 
                 if(typeof updater != 'function') {
                     throw Error ('Please provide an updater function as a second argument')
-                    return
                 }
 
                 return {
