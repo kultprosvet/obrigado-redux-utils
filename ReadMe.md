@@ -124,10 +124,10 @@ Type is a string that specifies what part of the store you want to reset.
 ```javascript
 actions.reset('user') // will reset user to initial state
 ``` 
-#Sagas
-You can easily create rootSaga and SagaHelper which helps you to run sagas from modules.
+# Sagas
+You can easily create rootSaga and SagaHelper which helps you to run sagas from components.
 ## Root saga
-1. Import all modules with sagas into array:
+1. Import all modules with sagas into object:
 ```javascript
 import * as module1 from './sagas/module1'
 import * as module2 from './sagas/module2'
@@ -140,7 +140,7 @@ import { createRootSaga} from 'obrigado-redux-utils'
 sagaMiddleware.run(createRootSaga(sagaModules))
 ```
 createRootSaga generates action handler for each saga in format \[RUN_sagaName in upperCase\]
-### Saga helper
+## Saga helper
 SagaHelper is created in way similar to creating rootSaga
 ```javascript  
 import { createSagaHelper} from 'obrigado-redux-utils'
