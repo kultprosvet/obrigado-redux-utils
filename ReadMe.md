@@ -1,3 +1,6 @@
+	<a href="https://badge.fury.io/js/obrigado-redux-utils">
+		<img src="https://badge.fury.io/js/typeorm.svg">
+	</a>
 # Obrigado-Redux utils
 
 obrigado-redux-utils is a small library designed to automatically generate Redux store, actions and reducers. 
