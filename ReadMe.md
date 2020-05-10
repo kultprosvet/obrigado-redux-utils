@@ -129,6 +129,7 @@ ReduxHelper.reset('user') // will reset user to initial state
 ``` 
 #### setInAction, mergeInAction, mergeDeepInAction, updateIn, resetAction
 These methods only create action object, that can be dispatched to store. They can be very useful in sagas.
+
 # Sagas
 You can easily create rootSaga and SagaHelper which helps you to run sagas from components.
 ## Root saga
