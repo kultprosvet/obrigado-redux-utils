@@ -48,5 +48,24 @@ export function createSagaHelper<SagaModules>(modules: SagaModules, store: any) 
                 store.dispatch(sagaAction)
             })
         },
+        //Can be used in envs when store is inaccessible ( react admin)
+        runWithDispatch: <T extends SagaModules, L extends Path<T, L>, U extends Parameters<FunctionWrapper<PathValue<T, L>>>>(
+            path: L,
+            dispatch:(payload:any)=>void,
+            ...payload: U
+        ): Promise<any> => {
+            return new Promise((resolve, reject) => {
+                // @ts-ignore
+                const sagaAction = {
+                    // @ts-ignore
+                    type: `RUN_${path[0].toUpperCase()}_${path[1].toUpperCase()}`,
+                    resolve,
+                    reject,
+                    payload,
+                }
+                // @ts-ignore
+                dispatch(sagaAction)
+            })
+        },
     }
 }
