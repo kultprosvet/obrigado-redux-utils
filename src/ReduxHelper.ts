@@ -22,7 +22,7 @@ export class ReduxHelper<StoreState> {
     ) {
         this.checkInput(path[0], payload)
         //@ts-ignore
-        this.store.dispatch(this.mergeInAction(path, payload))
+        this.store.dispatch(this.setInAction(path, payload))
     }
 
     setInAction<T extends StoreState, L extends Path<T, L>, U extends RecursivePartial<PathValue<T, L>>>(
