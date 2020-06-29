@@ -27,7 +27,11 @@ export class ReduxBuilder<StoreState> {
             reducers[key] = (state = initialState(), action) => {
                 if (action.type == `${key.toUpperCase()}_SET_IN`) {
                     action.payload.path.splice(0, 1)
-                    return state.setIn(action.payload.path, action.payload.payload)
+                    if (action.payload.path.length == 0) {
+                        return Record(action.payload.payload, key)()
+                    } else {
+                        return state.setIn(action.payload.path, action.payload.payload)
+                    }
                 } else if (action.type == `${key.toUpperCase()}_MERGE_IN`) {
                     action.payload.path.splice(0, 1)
                     return state.mergeIn(action.payload.path, action.payload.payload)
