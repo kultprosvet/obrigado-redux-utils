@@ -1,4 +1,4 @@
-import { Path, PathValue, RecursivePartial } from './TSTypes'
+import { Path, PathValue, RecursivePartial } from './types/TSTypes'
 
 export class ReduxHelper<StoreState> {
     store
@@ -29,10 +29,11 @@ export class ReduxHelper<StoreState> {
         path: L,
         payload: U,
     ) {
+        const p = path as any[]
         this.checkInput(path[0], payload)
 
         return {
-            type: `${path[0].toString().toUpperCase()}_SET_IN`,
+            type: `${p.join('_').toUpperCase()}__SET_IN`,
             payload: {
                 path,
                 payload,
@@ -53,9 +54,9 @@ export class ReduxHelper<StoreState> {
         payload: U,
     ) {
         this.checkInput(path[0], payload)
-
+        const p = path as any[]
         return {
-            type: `${path[0].toString().toUpperCase()}_MERGE_IN`,
+            type: `${p.join('_').toUpperCase()}__MERGE_IN`,
             payload: {
                 path,
                 payload,
@@ -77,9 +78,9 @@ export class ReduxHelper<StoreState> {
         payload: U,
     ) {
         this.checkInput(path[0], payload)
-
+        const p = path as any[]
         return {
-            type: `${path[0].toString().toUpperCase()}_MERGE_DEEP_IN`,
+            type: `${p.join('_').toUpperCase()}__MERGE_DEEP_IN`,
             payload: {
                 path,
                 payload,
@@ -113,9 +114,9 @@ export class ReduxHelper<StoreState> {
         if (typeof updater != 'function') {
             throw Error('Please provide an updater function as a second argument')
         }
-
+        const p = path as any[]
         return {
-            type: `${path[0].toString().toUpperCase()}_UPDATE_IN`,
+            type: `${p.join('_').toUpperCase()}__UPDATE_IN`,
             payload: {
                 path,
                 updater,
@@ -133,7 +134,7 @@ export class ReduxHelper<StoreState> {
         this.checkInput(type)
 
         return {
-            type: `${type.toString().toUpperCase()}_RESET`,
+            type: `${type.toString().toUpperCase()}__RESET`,
         }
     }
 }

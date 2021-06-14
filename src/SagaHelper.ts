@@ -1,7 +1,10 @@
 import { takeEvery, call } from 'redux-saga/effects'
-import { Action } from 'redux'
-import { Path, PathValue } from './TSTypes'
 
+import { Path, PathValue } from './types/TSTypes'
+type Action = {
+    type: string
+    payload: any
+}
 type SagaAction = {
     type: string
     resolve: (result: any) => void
