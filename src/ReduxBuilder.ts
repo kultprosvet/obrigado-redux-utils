@@ -30,6 +30,7 @@ export class ReduxBuilder<StoreState> {
     createReducer() {
         const initialState = transformToImmutable(this.data)
         const reducer = (state = initialState, action: ReduxAction) => {
+            console.log('state', state, action)
             const payload = transformToImmutable(action.payload?.payload)
             // console.log(action)
             const reg = /.*__(SET_IN|MERGE_IN|MERGE_DEEP_IN|UPDATE_IN)$/
