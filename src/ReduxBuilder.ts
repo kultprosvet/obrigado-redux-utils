@@ -1,6 +1,8 @@
 //@ts-ignore
 import { ReduxHelper } from './ReduxHelper'
 import { transformToImmutable } from './persists/transformToImmutable'
+import { combineReducers } from 'redux'
+
 type ReduxAction = {
     type: string
     payload: {
@@ -27,42 +29,45 @@ export class ReduxBuilder<StoreState> {
 
         return new ReduxHelper<StoreState>(store, this.data)
     }
-    createReducer() {
-        const initialState = transformToImmutable(this.data)
-        const reducer = (state = initialState, action: ReduxAction) => {
-            console.log('state', state, action)
-            const payload = transformToImmutable(action.payload?.payload)
-            // console.log(action)
-            const reg = /.*__(SET_IN|MERGE_IN|MERGE_DEEP_IN|UPDATE_IN)$/
-            const path = action.payload?.path
-            const match = action.type.match(reg)
-            if (match && (!path || path?.length == 0)) throw new Error('Please specify path')
-            const type = match?.[1]
-            if (type == `SET_IN`) {
-                if (!state) {
-                    const state = initialState
-                    return state.setIn(action.payload.path, payload)
-                } else {
-                    return state.setIn(action.payload.path, payload)
-                }
-            } else if (type == `MERGE_IN`) {
-                return state.mergeIn(action.payload.path, payload)
-            } else if (type == `MERGE_DEEP_IN`) {
-                return state.mergeDeepIn(action.payload.path, payload)
-            } else if (type == `UPDATE_IN`) {
-                return state.updateIn(action.payload.path, action.payload.updater)
-            } else if (type == `$RESET`) {
-                return initialState
-            }
-            return state
-        }
-        return reducer
-    }
-
-    /**
-     * @deprecated use createReducer
-     */
     createReducers() {
-        throw new Error('Please use createReducer')
+        let reducers: any = {}
+        for (let key in this.data) {
+            const initialState = transformToImmutable(this.data[key])
+            reducers[key] = (state = initialState, action: ReduxAction) => {
+                const reg = new RegExp(`${key.toUpperCase()}.*__(SET_IN|MERGE_IN|MERGE_DEEP_IN|UPDATE_IN)$`)
+                const match = action.type.match(reg)
+                if (!match) return state
+                const path = action.payload.path
+                if (match && (!path || path?.length == 0)) throw new Error('Please specify path')
+                path.splice(0, 1)
+                const type = match?.[1]
+                if (type == `SET_IN`) {
+                    const payload = transformToImmutable(action.payload.payload)
+                    if (path.length == 0) {
+                        return transformToImmutable(payload)
+                    } else if (!state) {
+                        const state = initialState
+                        return state.setIn(path, payload)
+                    } else {
+                        return state.setIn(path, payload)
+                    }
+                } else if (type == `MERGE_IN`) {
+                    const payload = transformToImmutable(action.payload.payload)
+                    return state.mergeIn(path, payload)
+                } else if (type == `MERGE_DEEP_IN`) {
+                    const payload = transformToImmutable(action.payload.payload)
+                    return state.mergeDeepIn(path, payload)
+                } else if (type == `UPDATE_IN`) {
+                    return state.updateIn(path, action.payload.updater)
+                } else if (type == `RESET`) {
+                    return initialState
+                }
+                return state
+            }
+        }
+        return reducers
+    }
+    createReducer() {
+        return combineReducers(this.createReducers())
     }
 }
