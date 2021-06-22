@@ -32,6 +32,7 @@ export function createRootSaga(modules: any) {
     }
 }
 type FunctionWrapper<F> = F extends (...args: any) => any ? F : (a: any) => void
+type SagaReturn<F> = F extends (...args: any) => Generator<never, infer U, never> ? U : any
 export function createSagaHelper<SagaModules>(modules: SagaModules, store: any): SagaHelper<SagaModules> {
     return new SagaHelper<SagaModules>(store)
 }
@@ -43,10 +44,12 @@ export class SagaHelper<SagaModules> {
     setStore(store: any) {
         this.store = store
     }
-    run<T extends SagaModules, L extends Path<T, L>, U extends Parameters<FunctionWrapper<PathValue<T, L>>>>(
-        path: L,
-        ...payload: U
-    ): Promise<any> {
+    run<
+        T extends SagaModules,
+        L extends Path<T, L>,
+        U extends Parameters<FunctionWrapper<PathValue<T, L>>>,
+        R extends SagaReturn<PathValue<T, L>>
+    >(path: L, ...payload: U): Promise<R> {
         return new Promise((resolve, reject) => {
             // @ts-ignore
             const sagaAction = {
@@ -64,8 +67,9 @@ export class SagaHelper<SagaModules> {
     runWithDispatch<
         T extends SagaModules,
         L extends Path<T, L>,
-        U extends Parameters<FunctionWrapper<PathValue<T, L>>>
-    >(path: L, dispatch: (payload: any) => void, ...payload: U): Promise<any> {
+        U extends Parameters<FunctionWrapper<PathValue<T, L>>>,
+        R extends SagaReturn<PathValue<T, L>>
+    >(path: L, dispatch: (payload: any) => void, ...payload: U): Promise<R> {
         return new Promise((resolve, reject) => {
             // @ts-ignore
             const sagaAction = {
@@ -80,3 +84,18 @@ export class SagaHelper<SagaModules> {
         })
     }
 }
+/*
+const sagaModules = {
+    test: {
+        testSaga: function* (f: number) {
+            return { a: 12 }
+        },
+    },
+}
+//@ts-ignore
+const helper = createSagaHelper(sagaModules)
+
+helper.run(['test', 'testSaga'], 12).then((d) => {
+    d.a
+})
+*/

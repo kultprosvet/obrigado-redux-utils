@@ -6,7 +6,7 @@
 </div>	
 obrigado-redux-utils is a small library designed to automatically generate Redux store, actions and reducers. 
 
-It uses [Immutable.js](https://immutable-js.github.io/immutable-js/) Records to ensure store immutability.
+It uses [Immutable.js](https://immutable-js.github.io/immutable-js/) Records and lists to ensure store immutability.
 
 Can be easily set up with [redux-persist](https://github.com/rt2zz/redux-persist).
 
@@ -22,31 +22,31 @@ Use ES6 spread operator and combineReducers function from Redux to create rootRe
 Finally, create your store with createStore from redux and pass your root reducer to the ```createReduxHelper()``` method.
 
 ```javascript
-import { ReduxBuilder } from 'obrigado-redux-utils'
-import { createStore, combineReducers } from 'redux'
+import {ReduxBuilder, ReduxStoreStateTemplate} from 'obrigado-redux-utils'
+import {createStore, combineReducers} from 'redux'
 
 const data = {
-  user: {
-    name: {
-      firstName: 'Jhon',
-      lastName: 'Doe'
+    user: {
+        name: {
+            firstName: 'Jhon',
+            lastName: 'Ivanov'
+        },
+        age: 25,
+        bd:new Date()
     },
-    age: 25
-  },
-  posts: {
-    data: List(['one', 'two'])
-  }
+    posts: {
+        data: ['one', 'two']
+    },
+    isBool:true
 }
+// Use this type inside selectors
+export type ReduxStoreState = ReduxStoreStateTemplate<typeof data>
+const builder = new ReduxBuilder(data)
+const reducer= builder.createReducer()
 
-const builder= new ReduxBuilder(data)
-const reducers = builder.createReducers()
+export const store = createStore(reducer)
+// @ts-ignore
 
-const rootReducer = combineReducers({
-    ...reducers,
-    // your other reducers
-})
-
-const store = createStore(rootReducer)
 
 export const ReduxHelper = builder.createReduxHelper(store)
 ``` 
@@ -68,18 +68,55 @@ You will need to pass in storage engine, a list of whitelisted reducers.
 Optionally, you can also pass an object with your custom reducers.
 
 ```javascript
-import { ReduxBuilder } from 'obrigado-redux-utils'
-import { createStore } from 'redux'
+import {ReduxBuilder, PersistTransform, persistsReconciler, ReduxStoreStateTemplate} from 'obrigado-redux-utils'
+import {createStore, combineReducers} from 'redux'
+import {persistStore, persistReducer} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-import { data } from 'path/to/data/object'
-import { customReducer } from 'path/to/custom/reducer'
 
+// defaults to localStorage for web
+const persistConfig = {
+    key: 'root',
+    storage,
+    transforms: [PersistTransform({
+        whitelist: [
+            'user',
+            'posts',
+            'isBool'
+        ]
+    })],
+    stateReconciler: persistsReconciler
+
+}
+
+const data = {
+    user: {
+        name: {
+            firstName: 'Jhon',
+            lastName: 'Ivanov'
+        },
+        age: 25,
+        bd:new Date()
+    },
+    posts: {
+        data: ['one', 'two']
+    },
+    isBool:true
+}
+// Use this type inside selectors
+export type ReduxStoreState =  ReduxStoreStateTemplate<typeof data> 
 const builder = new ReduxBuilder(data)
-const persistedReducer = builder.createPersistsReducers(storage, ['user', 'custom'], { custom: customReducer })
+const reducer= builder.createReducer()
+// @ts-ignore
+const persistedReducer = persistReducer(persistConfig, reducer)
 
-const store = createStore(persistedReducer)
 
-export const ReduxeHelper = builder.createReduxHelper(store)
+export const store = createStore(persistedReducer)
+// @ts-ignore
+export const persistor = persistStore(store)
+
+
+export const ReduxHelper = builder.createReduxHelper(store)
+
 ```
 
 ## ReduxeHelper's  methods 
@@ -133,7 +170,12 @@ ReduxHelper.reset('user') // will reset user to initial state
 ``` 
 #### setInAction, mergeInAction, mergeDeepInAction, updateIn, resetAction
 These methods only create action object, that can be dispatched to store. They can be very useful in sagas.
-
+##Selectors
+Lib transforms all incoming objects too immutable records and lists. Lib provides generic type ReduxStoreStateTemplate<T>,
+that helps to access redux store  state.
+```javascript
+  const user=useSelector((state:ReduxStoreState)=>state.user)
+```
 # Sagas
 You can easily create rootSaga and SagaHelper which helps you to run sagas from components.
 ## Root saga

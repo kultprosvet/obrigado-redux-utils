@@ -19,8 +19,7 @@ export function transformToImmutable(v: any | never): any {
         }
 
         return Record(out)()
-    }
-    if (typeof v == 'string') {
+    } else if (typeof v == 'string') {
         const match = v.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z/)
         if (match) return new Date(v)
     }
