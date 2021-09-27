@@ -34,10 +34,10 @@ export class ReduxBuilder<StoreState> {
         for (let key in this.data) {
             const initialState = transformToImmutable(this.data[key])
             reducers[key] = (state = initialState, action: ReduxAction) => {
-                const reg = new RegExp(`${key.toUpperCase()}.*__(SET_IN|MERGE_IN|MERGE_DEEP_IN|UPDATE_IN)$`)
+                const reg = new RegExp(`^${key.toUpperCase()}.*__(SET_IN|MERGE_IN|MERGE_DEEP_IN|UPDATE_IN)$`)
                 const match = action.type.match(reg)
                 if (!match) return state
-                const path = action.payload.path
+                const path = [...action.payload.path]
                 if (match && (!path || path?.length == 0)) throw new Error('Please specify path')
                 path.splice(0, 1)
                 const type = match?.[1]
