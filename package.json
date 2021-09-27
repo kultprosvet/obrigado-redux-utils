@@ -1,12 +1,13 @@
 {
   "name": "obrigado-redux-utils",
-  "version": "3.0.1",
+  "version": "3.0.4",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install-peers": "install-peers -f"
+    "install-peers": "install-peers -f",
+    "publish": "tsc && npm publish"
   },
   "repository": {
     "type": "git",
