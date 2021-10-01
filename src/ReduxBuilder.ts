@@ -40,7 +40,7 @@ export class ReduxBuilder<StoreState> {
                 const path = [...action.payload.path]
                 if (match && (!path || path?.length == 0)) throw new Error('Please specify path')
                 path.splice(0, 1)
-                const type = match?.[1]
+                const type = match?.[2]
                 if (type == `SET_IN`) {
                     const payload = transformToImmutable(action.payload.payload)
                     if (path.length == 0) {
