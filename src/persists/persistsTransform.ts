@@ -4,7 +4,6 @@ import { transformToImmutable } from './transformToImmutable'
 type FilterItem = string | Record<string, FilterItem[]>
 type Filter = Array<FilterItem>
 export const PersistTransform = (p?: { whitelist: Filter }) => {
-    let config = {}
     const whileListMap: Record<any, any> = {}
     if (p) {
         const whitelist: string[] = []
@@ -20,7 +19,6 @@ export const PersistTransform = (p?: { whitelist: Filter }) => {
                 }
             }
         }
-        config = { whitelist }
     }
 
     return createTransform(
@@ -29,12 +27,14 @@ export const PersistTransform = (p?: { whitelist: Filter }) => {
             if (key == '_persist') {
                 return inboundState
             }
+            if (!whileListMap[key as string]) {
+                return undefined
+            }
             //console.log('in', inboundState, key, rawState)
             if (inboundState?.toJS) {
                 const obj = inboundState.toJS()
-                if (whileListMap[key as string]) {
-                    return filterObjField(obj, whileListMap[key as string])
-                } else return {}
+                // @ts-ignore
+                return filterObjField(obj, whileListMap[key as string])
             } else return inboundState
         },
         // transform state being rehydrated
@@ -44,12 +44,11 @@ export const PersistTransform = (p?: { whitelist: Filter }) => {
             }
             return transformToImmutable(outboundState)
         },
-        // define which reducers this transform gets called for.
-        config,
     )
 }
 function filterObjField(obj: Record<string, any>, filter: Filter | boolean) {
     const out: Record<string, any> = {}
+
     if (typeof filter == 'boolean') {
         return obj
     }
@@ -62,5 +61,6 @@ function filterObjField(obj: Record<string, any>, filter: Filter | boolean) {
             }
         }
     }
+
     return out
 }

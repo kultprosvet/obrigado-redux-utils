@@ -79,8 +79,7 @@ const persistConfig = {
     storage,
     transforms: [PersistTransform({
         whitelist: [
-            'user',
-            'posts',
+            {user:['name','age']},
             'isBool'
         ]
     })],
@@ -108,7 +107,6 @@ const builder = new ReduxBuilder(data)
 const reducer= builder.createReducer()
 // @ts-ignore
 const persistedReducer = persistReducer(persistConfig, reducer)
-
 
 export const store = createStore(persistedReducer)
 // @ts-ignore
