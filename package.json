@@ -1,6 +1,6 @@
 {
   "name": "obrigado-redux-utils",
-  "version": "3.0.11",
+  "version": "3.0.12",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "install-peers": "install-peers -f",
     "build": "tsc",
     "test": "npx jest",
-    "publishLib": "tsc && npm publish"
+    "publish": "npm test && tsc && npm publish"
   },
   "repository": {
     "type": "git",

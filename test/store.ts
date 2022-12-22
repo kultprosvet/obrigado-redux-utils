@@ -5,7 +5,14 @@ const data = {
     user: {
         name: {
             firstName: 'Jhon',
-            lastName: 'Ivanov'
+            lastName: 'Bdjolko'
+        },
+        job: {
+            title: "plumber",
+            schedule: {
+                mon: "8:00 AM",
+                sun: "DAY OFF",
+            }
         },
         age: 25,
         bd: new Date()
