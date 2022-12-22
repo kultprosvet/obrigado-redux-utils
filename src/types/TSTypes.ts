@@ -1,5 +1,7 @@
 interface PathArray<T, L> extends Array<string | number> {
+    // @ts-ignore
     ["0"]?: keyof T;
+    // @ts-ignore
     ["1"]?: L extends {
             ["0"]: infer K0;
         }
@@ -7,6 +9,7 @@ interface PathArray<T, L> extends Array<string | number> {
             ? keyof T[K0]
             : never
         : never;
+    // @ts-ignore
     ["2"]?: L extends {
             ["0"]: infer K0;
             ["1"]: infer K1;
@@ -17,6 +20,7 @@ interface PathArray<T, L> extends Array<string | number> {
                 : never
             : never
         : never;
+    // @ts-ignore
     ["3"]?: L extends {
             ["0"]: infer K0;
             ["1"]: infer K1;
@@ -30,6 +34,7 @@ interface PathArray<T, L> extends Array<string | number> {
                 : never
             : never
         : never;
+    // @ts-ignore
     ["4"]?: L extends {
             ["0"]: infer K0;
             ["1"]: infer K1;
@@ -46,6 +51,7 @@ interface PathArray<T, L> extends Array<string | number> {
                 : never
             : never
         : never;
+    // @ts-ignore
     ["5"]?: L extends {
             ["0"]: infer K0;
             ["1"]: infer K1;
@@ -65,6 +71,7 @@ interface PathArray<T, L> extends Array<string | number> {
                 : never
             : never
         : never;
+    // @ts-ignore
     ["6"]?: L extends {
             ["0"]: infer K0;
             ["1"]: infer K1;

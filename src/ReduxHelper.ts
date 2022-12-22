@@ -135,6 +135,9 @@ export class ReduxHelper<StoreState> {
 
         return {
             type: `${type.toString().toUpperCase()}__RESET`,
+            payload:{
+                path:["type"]
+            }
         }
     }
 }

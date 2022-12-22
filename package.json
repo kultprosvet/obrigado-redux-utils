@@ -1,13 +1,13 @@
 {
   "name": "obrigado-redux-utils",
-  "version": "3.0.10",
+  "version": "3.0.11",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "install-peers": "install-peers -f",
     "build": "tsc",
+    "test": "npx jest",
     "publishLib": "tsc && npm publish"
   },
   "repository": {
@@ -21,14 +21,17 @@
   },
   "homepage": "https://github.com/kultprosvet/obrigado-redux-utils#readme",
   "devDependencies": {
+    "@testing-library/react": "^13.4.0",
+    "@types/jest": "^29.2.4",
     "@types/node": "^15.6.1",
     "install-peers-cli": "^2.2.0",
     "prettier": "^2.x",
+    "ts-jest": "^29.0.3",
     "typescript": "^4.x"
   },
   "peerDependencies": {
-    "redux-persist": "^6.x",
     "redux": "^4.x",
+    "redux-persist": "^6.x",
     "redux-saga": "^1.x"
   },
   "dependencies": {
