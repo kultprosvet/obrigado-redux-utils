@@ -52,17 +52,17 @@ export class ReduxBuilder<StoreState> {
                         return state.setIn(path, payload)
                     }
                 } else if (type == `MERGE_IN`) {
+                    const payload = transformToImmutable(action.payload.payload)
                     if (path.length == 0) {
-                        return state.merge(action.payload.payload);
+                        return state.merge(payload);
                     } else {
-                        const payload = transformToImmutable(action.payload.payload)
                         return state.mergeIn(path, payload)
                     }
                 } else if (type == `MERGE_DEEP_IN`) {
+                    const payload = transformToImmutable(action.payload.payload)
                     if (path.length == 0) {
-                        return state.mergeDeep(action.payload.payload);
+                        return state.mergeDeep(payload);
                     } else {
-                        const payload = transformToImmutable(action.payload.payload)
                         return state.mergeDeepIn(path, payload)
                     }
                 } else if (type == `UPDATE_IN`) {

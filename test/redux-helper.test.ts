@@ -48,6 +48,12 @@ describe("redux helper", () => {
         state = store.getState() as ReduxStoreState
         expect(state.user.name.firstName).toEqual("Vasiliy");
         expect(state.user.name.lastName).toEqual("Bdjolko");
+
+        ReduxHelper.mergeIn(["posts"],{data:["one","two","three"]});
+        state = store.getState() as ReduxStoreState
+        expect(state.posts.data.toJS).toBeDefined();
+        expect(state.posts.data.toArray()).toEqual(["one","two","three"]);
+
     })
     it("should run updater", () => {
         const {store, ReduxHelper} = buildStore();
