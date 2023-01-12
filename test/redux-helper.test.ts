@@ -8,6 +8,14 @@ describe("redux helper", () => {
             state.user.age = 30
         }).toThrow();
     });
+    it("should allow to transform state to JS",()=>{
+        const {store} = buildStore();
+        const state = store.getState() as any;
+        expect(state.user.toJS).toBeDefined();
+        expect(state.user.toJS()).toBeDefined();
+        expect(state.user.job.toJS).toBeDefined();
+        expect(state.user.job.schedule.toJS).toBeDefined();
+    });
     it("should update state", () => {
         const {store, ReduxHelper} = buildStore();
         let state = store.getState() as ReduxStoreState;

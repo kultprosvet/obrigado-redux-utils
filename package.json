@@ -1,6 +1,6 @@
 {
   "name": "obrigado-redux-utils",
-  "version": "3.0.12",
+  "version": "3.0.14",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "install-peers": "install-peers -f",
     "build": "tsc",
     "test": "npx jest",
-    "publish": "npm test && tsc && npm publish"
+    "deploy": "npm test && rm -rf dist/* && tsc && npm publish"
   },
   "repository": {
     "type": "git",
@@ -35,7 +35,7 @@
     "redux-saga": "^1.x"
   },
   "dependencies": {
-    "immutable": "^4.1.0",
+    "immutable": "4.2.2",
     "lodash": "^4.17.21"
   }
 }
