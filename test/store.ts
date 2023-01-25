@@ -20,7 +20,10 @@ const data = {
     posts: {
         data: ['one', 'two']
     },
-    isBool: true
+    isBool: true,
+    week: {
+        days: [{times: [{time: '12:00:00'}]}],
+    },
 }
 // Use this type inside selectors
 export type ReduxStoreState = ReduxStoreStateTemplate<typeof data>
