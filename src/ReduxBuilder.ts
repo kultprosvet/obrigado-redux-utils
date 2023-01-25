@@ -2,6 +2,7 @@
 import { ReduxHelper } from './ReduxHelper'
 import { transformToImmutable } from './persists/transformToImmutable'
 import { combineReducers } from 'redux'
+import * as _ from "lodash"
 
 type ReduxAction = {
     type: string
@@ -66,7 +67,14 @@ export class ReduxBuilder<StoreState> {
                         return state.mergeDeepIn(path, payload)
                     }
                 } else if (type == `UPDATE_IN`) {
-                    return state.updateIn(path, action.payload.updater)
+                    return state.updateIn(path, (v)=>{
+                        const updatedValue = action.payload.updater(v)
+                        if (_.isObjectLike(updatedValue)){
+                            return transformToImmutable(updatedValue);
+                        }else{
+                            return updatedValue;
+                        }
+                    })
                 } else if (type == `RESET`) {
                     return initialState
                 }
